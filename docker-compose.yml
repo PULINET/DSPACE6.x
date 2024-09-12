@@ -1,0 +1,47 @@
+version: "3.3"
+
+services:
+  dspacedb:
+    image: jummumboy/dspacedb
+    # Note that a separate image exists for DSpace 4x
+    # image: dspace/dspace-postgres-4x
+    container_name: dspacedb
+    environment:
+      - PGDATA=/pgdata
+    volumes:
+      - /home/dspace/pgdata:/pgdata
+    restart: always
+    networks:
+      - dspacenet
+    tty: true
+    stdin_open: true
+
+  dspace:
+    image: "${DOCKER_OWNER:-dspace}/dspace:${DSPACE_VER:-dspace-6_x-jdk8}"
+    container_name: dspace
+    environment:
+      - DSPACE_INSTALL=/dspace
+    ports:
+      - 8010:8080
+    volumes:
+      #- "assetstore:/dspace/assetstore"
+      #- "solr:/dspace/solr"
+      - /home/dspace/dspace:/dspace
+      - /home/dspace/tomcat:/usr/local/tomcat
+      # Uncomment the following to enable Mirage2 (DSpace 5x or 6x only)
+      # - "../../add-ons/mirage2/xmlui.xconf:/dspace/config/xmlui.xconf"
+    networks:
+      - dspacenet
+    restart: always
+    depends_on:
+      - dspacedb
+    tty: true
+    stdin_open: true
+
+volumes:
+  pgdata:
+  assetstore:
+  solr:
+
+networks:
+  dspacenet:
